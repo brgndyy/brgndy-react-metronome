@@ -9,8 +9,7 @@ import {
 import tickSound from "./tick.wav";
 import tockSound from "./tock.wav";
 import CONDITION from "../../constants/condition";
-import { useMetronome } from "../MetronomeContext/MetronomeContext";
-import { withMetronomeContext } from "../MetronomeContext/withMetronomeContext";
+import { useMetronome } from "../MetronomeProvider/MetronomeProvider";
 
 interface MetronomeProps extends PropsWithChildren<{}> {
   type: "number" | "range";
@@ -21,7 +20,7 @@ interface MetronomeProps extends PropsWithChildren<{}> {
 
 function Metronome(props: MetronomeProps) {
   const bpmRef = useRef<HTMLInputElement | null>(null);
-  // const { isPlaying } = useMetronome();
+  const { isPlaying } = useMetronome();
   const { type = "number", className = "" } = props;
   const [minBpm, setMinBpm] = useState<number>(
     props.minBpm || CONDITION.min_bpm
@@ -35,6 +34,10 @@ function Metronome(props: MetronomeProps) {
   const [count, setCount] = useState<number>(1);
   const [first, setFirst] = useState(false);
   const [blur, setBlur] = useState(false);
+
+  useEffect(() => {
+    console.log("메트로놈 컴포넌트 안에서의 isPlaying : ", isPlaying);
+  }, [isPlaying]);
 
   const metronomePlayHandler = useCallback(() => {
     if (!first && tick) {
@@ -62,13 +65,15 @@ function Metronome(props: MetronomeProps) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      metronomePlayHandler();
+      if (isPlaying) {
+        metronomePlayHandler();
+      }
     }, (60 / bpm) * 1000);
 
     return () => {
       clearInterval(interval);
     };
-  }, [bpm, metronomePlayHandler]);
+  }, [bpm, isPlaying]);
 
   const bpmChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newBpm = parseInt(e.target.value, 10);
@@ -125,7 +130,7 @@ function Metronome(props: MetronomeProps) {
 
   return (
     <input
-      // ref={bpmRef}
+      ref={bpmRef}
       type={type}
       className={className}
       step={1}

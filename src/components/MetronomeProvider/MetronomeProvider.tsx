@@ -7,12 +7,12 @@ import React, {
 
 interface MetronomeContextProps {
   isPlaying: boolean;
-  setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+  metronomePlayHandler: () => void;
 }
 
 const MetronomeContext = createContext<MetronomeContextProps>({
   isPlaying: false,
-  setIsPlaying: () => {},
+  metronomePlayHandler: () => {},
 });
 
 export const useMetronome = () => {
@@ -21,13 +21,19 @@ export const useMetronome = () => {
   return context;
 };
 
-export const MetronomeProvider = (props: PropsWithChildren<object>) => {
+function MetronomeProvider(props: PropsWithChildren<object>) {
   const { children } = props;
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const metronomePlayHandler = () => {
+    setIsPlaying((prevIsPlaying) => !prevIsPlaying);
+  };
+
   return (
-    <MetronomeContext.Provider value={{ isPlaying, setIsPlaying }}>
+    <MetronomeContext.Provider value={{ isPlaying, metronomePlayHandler }}>
       {children}
     </MetronomeContext.Provider>
   );
-};
+}
+
+export default MetronomeProvider;

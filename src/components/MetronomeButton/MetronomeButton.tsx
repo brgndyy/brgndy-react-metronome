@@ -1,6 +1,5 @@
-import React, { PropsWithChildren, useState, useEffect } from "react";
-import { useMetronome } from "../MetronomeContext/MetronomeContext";
-import { withMetronomeContext } from "../MetronomeContext/withMetronomeContext";
+import React, { PropsWithChildren, useEffect } from "react";
+import { useMetronome } from "../MetronomeProvider/MetronomeProvider";
 
 interface MetronomeButtonProps extends PropsWithChildren<{}> {
   className: string;
@@ -9,18 +8,13 @@ interface MetronomeButtonProps extends PropsWithChildren<{}> {
 
 function MetronomeButton(props: MetronomeButtonProps) {
   const { className = "", buttonTexts } = props;
-  const [clicked, setClicked] = useState(false);
-
-  const handleClick = () => {
-    setClicked(!clicked);
-  };
+  const { isPlaying, metronomePlayHandler } = useMetronome();
 
   return (
     <>
-      <button className={className} onClick={handleClick}>
-        {(buttonTexts[1], buttonTexts[0])}
+      <button className={className} onClick={metronomePlayHandler}>
+        {isPlaying ? buttonTexts[1] : buttonTexts[0]}
       </button>
-      {clicked ? "클릭" : "클릭취소"}
     </>
   );
 }
