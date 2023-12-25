@@ -1,25 +1,5 @@
-import React, {
-  createContext,
-  useState,
-  useContext,
-  PropsWithChildren,
-} from "react";
-
-interface MetronomeContextProps {
-  isPlaying: boolean;
-  metronomePlayHandler: () => void;
-}
-
-const MetronomeContext = createContext<MetronomeContextProps>({
-  isPlaying: false,
-  metronomePlayHandler: () => {},
-});
-
-export const useMetronome = () => {
-  const context = useContext(MetronomeContext);
-
-  return context;
-};
+import React, { useState, PropsWithChildren } from "react";
+import MetronomeContext from "../../context/MetronomeContext";
 
 function MetronomeProvider(props: PropsWithChildren<object>) {
   const { children } = props;

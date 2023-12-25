@@ -9,7 +9,7 @@ import {
 import tickSound from "./tick.wav";
 import tockSound from "./tock.wav";
 import CONDITION from "../../constants/condition";
-import { useMetronome } from "../MetronomeProvider/MetronomeProvider";
+import useMetronome from "../../hooks/useMetronome";
 
 interface MetronomeProps extends PropsWithChildren<{}> {
   type: "number" | "range";

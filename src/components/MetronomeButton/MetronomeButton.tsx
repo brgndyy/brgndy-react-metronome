@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect } from "react";
-import { useMetronome } from "../MetronomeProvider/MetronomeProvider";
+import useMetronome from "../../hooks/useMetronome";
 
 interface MetronomeButtonProps extends PropsWithChildren<{}> {
   className: string;
