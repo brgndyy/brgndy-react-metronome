@@ -11,12 +11,13 @@ import tockSound from "./tock.wav";
 import CONDITION from "../../constants/condition";
 import useMetronome from "../../hooks/useMetronome";
 
-interface MetronomeProps extends PropsWithChildren<{}> {
-  type: "number" | "range";
-  className: string;
-  minBpm: number;
-  maxBpm: number;
-}
+interface MetronomeProps
+  extends React.PropsWithChildren<{
+    type?: "number" | "range";
+    className?: string;
+    minBpm?: number;
+    maxBpm?: number;
+  }> {}
 
 function Metronome(props: MetronomeProps) {
   const bpmRef = useRef<HTMLInputElement | null>(null);
@@ -32,28 +33,26 @@ function Metronome(props: MetronomeProps) {
   const [tock, setTock] = useState<HTMLAudioElement>();
   const [bpm, setBpm] = useState<number>(60);
   const [count, setCount] = useState<number>(1);
-  const [first, setFirst] = useState(false);
   const [blur, setBlur] = useState(false);
 
-  useEffect(() => {
-    console.log("메트로놈 컴포넌트 안에서의 isPlaying : ", isPlaying);
-  }, [isPlaying]);
-
   const metronomePlayHandler = useCallback(() => {
-    if (!first && tick) {
-      setFirst(true);
+    const nextCount =
+      count >= CONDITION.max_metronome_count
+        ? CONDITION.min_metronome_count
+        : count + 1;
+
+    if (nextCount === CONDITION.min_metronome_count && tick) {
       tick.play();
-    } else if (count === CONDITION.min_metronome_count && tick) {
-      tick.play();
-    } else if (count < CONDITION.max_metronome_count + 1 && tock) {
+    } else if (nextCount > CONDITION.min_metronome_count && tock) {
       tock.play();
     }
-    if (count >= CONDITION.max_metronome_count) {
-      setCount(CONDITION.min_metronome_count);
-    } else {
-      setCount((prevCount) => prevCount + 1);
-    }
-  }, [count, tick, tock, first]);
+
+    setCount(nextCount);
+  }, [count, tick, tock]);
+
+  // useEffect(() => {
+  //   console.log(count);
+  // }, [count]);
 
   useEffect(() => {
     setTick(new Audio(tickSound));
@@ -73,7 +72,7 @@ function Metronome(props: MetronomeProps) {
     return () => {
       clearInterval(interval);
     };
-  }, [bpm, isPlaying]);
+  }, [bpm, isPlaying, count]);
 
   const bpmChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newBpm = parseInt(e.target.value, 10);
