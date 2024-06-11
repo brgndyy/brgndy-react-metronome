@@ -1,16 +1,16 @@
-import React, { useState, PropsWithChildren } from "react";
-import MetronomeContext from "../../context/MetronomeContext";
+import React, { useState, PropsWithChildren } from 'react';
+import MetronomeContext from '../../context/MetronomeContext';
 
 function MetronomeProvider(props: PropsWithChildren<object>) {
   const { children } = props;
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const metronomePlayHandler = () => {
+  const handleMetronomePlay = () => {
     setIsPlaying((prevIsPlaying) => !prevIsPlaying);
   };
 
   return (
-    <MetronomeContext.Provider value={{ isPlaying, metronomePlayHandler }}>
+    <MetronomeContext.Provider value={{ isPlaying, handleMetronomePlay }}>
       {children}
     </MetronomeContext.Provider>
   );

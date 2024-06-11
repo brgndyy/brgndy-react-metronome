@@ -1,14 +1,8 @@
-import React from "react";
-import {
-  useState,
-  useEffect,
-  PropsWithChildren,
-  useCallback,
-  useRef,
-} from "react";
-import tickSound from "./tick.wav";
-import tockSound from "./tock.wav";
-import useMetronome from "../../hooks/useMetronome";
+import React from 'react';
+import { useState, useEffect, PropsWithChildren, useCallback, useRef } from 'react';
+import tickSound from '../../assets/tick.wav';
+import tockSound from '../../assets/tock.wav';
+import useMetronome from '../../hooks/useMetronome';
 
 const CONDITION = {
   min_bpm: 1,
@@ -18,8 +12,8 @@ const CONDITION = {
 } as const;
 
 interface MetronomeProps
-  extends React.PropsWithChildren<{
-    type?: "number" | "range";
+  extends PropsWithChildren<{
+    type?: 'number' | 'range';
     className?: string;
     minBpm?: number;
     maxBpm?: number;
@@ -28,24 +22,20 @@ interface MetronomeProps
 function Metronome(props: MetronomeProps) {
   const bpmRef = useRef<HTMLInputElement | null>(null);
   const { isPlaying } = useMetronome();
-  const { type = "number", className = "" } = props;
-  const [minBpm, setMinBpm] = useState<number>(
-    props.minBpm || CONDITION.min_bpm
-  );
-  const [maxBpm, setMaxBpm] = useState<number>(
-    props.maxBpm || CONDITION.max_bpm
-  );
+  const { type = 'number', className = '' } = props;
+  const [minBpm, setMinBpm] = useState<number>(props.minBpm || CONDITION.min_bpm);
+  const [maxBpm, setMaxBpm] = useState<number>(props.maxBpm || CONDITION.max_bpm);
   const [tick, setTick] = useState<HTMLAudioElement>();
   const [tock, setTock] = useState<HTMLAudioElement>();
   const [bpm, setBpm] = useState<number>(60);
   const [count, setCount] = useState<number>(1);
   const [blur, setBlur] = useState(false);
 
-  const metronomePlayHandler = useCallback(() => {
+  const handlePlayMetronomeSound = useCallback(() => {
     const nextCount =
-      count >= CONDITION.max_metronome_count
-        ? CONDITION.min_metronome_count
-        : count + 1;
+      count >= CONDITION.max_metronome_count ? CONDITION.min_metronome_count : count + 1;
+
+    console.log('nextCount : ', nextCount);
 
     if (nextCount === CONDITION.min_metronome_count && tick) {
       tick.play();
@@ -64,6 +54,8 @@ function Metronome(props: MetronomeProps) {
     setTick(new Audio(tickSound));
     setTock(new Audio(tockSound));
 
+    console.log('hi');
+
     setMinBpm((prev) => Math.max(CONDITION.min_bpm, props.minBpm || prev));
     setMaxBpm((prev) => Math.min(CONDITION.max_bpm, props.maxBpm || prev));
   }, [props.minBpm, props.maxBpm]);
@@ -72,10 +64,10 @@ function Metronome(props: MetronomeProps) {
     const interval = setInterval(
       () => {
         if (isPlaying) {
-          metronomePlayHandler();
+          handlePlayMetronomeSound();
         }
       },
-      (60 / bpm) * 1000
+      (60 / bpm) * 1000,
     );
 
     return () => {
@@ -83,7 +75,7 @@ function Metronome(props: MetronomeProps) {
     };
   }, [bpm, isPlaying, count]);
 
-  const bpmChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBPMChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let newBpm = parseInt(e.target.value, 10);
     if (newBpm < CONDITION.min_bpm) {
       newBpm = CONDITION.min_bpm;
@@ -116,7 +108,7 @@ function Metronome(props: MetronomeProps) {
   };
 
   const keyDownHandler = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (bpmRef.current && e.key === "Enter") {
+    if (bpmRef.current && e.key === 'Enter') {
       const newBpm = parseInt(e.currentTarget.value, 10);
 
       if (Number.isNaN(newBpm)) {
@@ -134,6 +126,8 @@ function Metronome(props: MetronomeProps) {
     if (bpmRef.current && bpmRef.current !== document.activeElement) {
       bpmRef.current.blur();
     }
+
+    console.log('테스트!');
   }, [bpmRef]);
 
   return (
@@ -147,7 +141,7 @@ function Metronome(props: MetronomeProps) {
       value={bpm}
       onBlur={bpmBlurHandler}
       onFocus={focusHandler}
-      onChange={bpmChangeHandler}
+      onChange={handleBPMChange}
       onKeyDown={keyDownHandler}
     />
   );
