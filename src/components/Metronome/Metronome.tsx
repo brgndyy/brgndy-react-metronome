@@ -8,8 +8,14 @@ import {
 } from "react";
 import tickSound from "./tick.wav";
 import tockSound from "./tock.wav";
-import CONDITION from "../../constants/condition";
 import useMetronome from "../../hooks/useMetronome";
+
+const CONDITION = {
+  min_bpm: 1,
+  max_bpm: 300,
+  min_metronome_count: 1,
+  max_metronome_count: 4,
+} as const;
 
 interface MetronomeProps
   extends React.PropsWithChildren<{
@@ -63,11 +69,14 @@ function Metronome(props: MetronomeProps) {
   }, [props.minBpm, props.maxBpm]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (isPlaying) {
-        metronomePlayHandler();
-      }
-    }, (60 / bpm) * 1000);
+    const interval = setInterval(
+      () => {
+        if (isPlaying) {
+          metronomePlayHandler();
+        }
+      },
+      (60 / bpm) * 1000
+    );
 
     return () => {
       clearInterval(interval);
