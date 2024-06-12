@@ -1,150 +1,30 @@
-import React from 'react';
-import { useState, useEffect, PropsWithChildren, useCallback, useRef } from 'react';
-import tickSound from '../../assets/tick.wav';
-import tockSound from '../../assets/tock.wav';
+import { PropsWithChildren, useMemo } from 'react';
+import MetronomeContext from '../../context/MetronomeContext';
 import useMetronome from '../../hooks/useMetronome';
+import PlayButton from '../PlayButton/PlayButton';
+import BPMInput from '../BPMInput/BPMInput';
 
-const CONDITION = {
-  min_bpm: 1,
-  max_bpm: 300,
-  min_metronome_count: 1,
-  max_metronome_count: 4,
-} as const;
+type Props = {
+  maxBpm?: number;
+  minBpm?: number;
+};
 
-interface MetronomeProps
-  extends PropsWithChildren<{
-    type?: 'number' | 'range';
-    className?: string;
-    minBpm?: number;
-    maxBpm?: number;
-  }> {}
+function Metronome({ children, minBpm = 1, maxBpm = 300 }: PropsWithChildren<Props>) {
+  const metronome = useMetronome({ minBpm, maxBpm });
 
-function Metronome(props: MetronomeProps) {
-  const bpmRef = useRef<HTMLInputElement | null>(null);
-  const { isPlaying } = useMetronome();
-  const { type = 'number', className = '' } = props;
-  const [minBpm, setMinBpm] = useState<number>(props.minBpm || CONDITION.min_bpm);
-  const [maxBpm, setMaxBpm] = useState<number>(props.maxBpm || CONDITION.max_bpm);
-  const [tick, setTick] = useState<HTMLAudioElement>();
-  const [tock, setTock] = useState<HTMLAudioElement>();
-  const [bpm, setBpm] = useState<number>(60);
-  const [count, setCount] = useState<number>(1);
-  const [blur, setBlur] = useState(false);
-
-  const handlePlayMetronomeSound = useCallback(() => {
-    const nextCount =
-      count >= CONDITION.max_metronome_count ? CONDITION.min_metronome_count : count + 1;
-
-    console.log('nextCount : ', nextCount);
-
-    if (nextCount === CONDITION.min_metronome_count && tick) {
-      tick.play();
-    } else if (nextCount > CONDITION.min_metronome_count && tock) {
-      tock.play();
-    }
-
-    setCount(nextCount);
-  }, [count, tick, tock]);
-
-  // useEffect(() => {
-  //   console.log(count);
-  // }, [count]);
-
-  useEffect(() => {
-    setTick(new Audio(tickSound));
-    setTock(new Audio(tockSound));
-
-    console.log('hi');
-
-    setMinBpm((prev) => Math.max(CONDITION.min_bpm, props.minBpm || prev));
-    setMaxBpm((prev) => Math.min(CONDITION.max_bpm, props.maxBpm || prev));
-  }, [props.minBpm, props.maxBpm]);
-
-  useEffect(() => {
-    const interval = setInterval(
-      () => {
-        if (isPlaying) {
-          handlePlayMetronomeSound();
-        }
-      },
-      (60 / bpm) * 1000,
-    );
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [bpm, isPlaying, count]);
-
-  const handleBPMChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let newBpm = parseInt(e.target.value, 10);
-    if (newBpm < CONDITION.min_bpm) {
-      newBpm = CONDITION.min_bpm;
-    }
-    if (newBpm > CONDITION.max_bpm) {
-      newBpm = CONDITION.max_bpm;
-      if (bpmRef.current) {
-        bpmRef.current.blur();
-      }
-    }
-    setBpm(newBpm);
-    if (bpmRef.current && Number.isNaN(newBpm)) {
-      bpmRef.current.focus();
-    }
-    if (bpmRef.current && newBpm > CONDITION.max_bpm) {
-      bpmRef.current.blur();
-    }
-  };
-
-  const bpmBlurHandler = () => {
-    if (bpmRef.current && bpm > CONDITION.max_bpm) {
-      setBpm(CONDITION.max_bpm);
-      bpmRef.current.blur();
-    }
-    if (bpmRef.current && Number.isNaN(bpm)) {
-      setBpm(CONDITION.min_bpm);
-      bpmRef.current.blur();
-    }
-    setBlur(true);
-  };
-
-  const keyDownHandler = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (bpmRef.current && e.key === 'Enter') {
-      const newBpm = parseInt(e.currentTarget.value, 10);
-
-      if (Number.isNaN(newBpm)) {
-        setBpm(CONDITION.min_bpm);
-      }
-      e.currentTarget.blur();
-    }
-  };
-
-  const focusHandler = () => {
-    setBlur(false);
-  };
-
-  useEffect(() => {
-    if (bpmRef.current && bpmRef.current !== document.activeElement) {
-      bpmRef.current.blur();
-    }
-
-    console.log('테스트!');
-  }, [bpmRef]);
-
-  return (
-    <input
-      ref={bpmRef}
-      type={type}
-      className={className}
-      step={1}
-      min={minBpm}
-      max={maxBpm}
-      value={bpm}
-      onBlur={bpmBlurHandler}
-      onFocus={focusHandler}
-      onChange={handleBPMChange}
-      onKeyDown={keyDownHandler}
-    />
+  const contextValue = useMemo(
+    () => ({
+      ...metronome,
+      minBpm,
+      maxBpm,
+    }),
+    [metronome, minBpm, maxBpm],
   );
+
+  return <MetronomeContext.Provider value={contextValue}>{children}</MetronomeContext.Provider>;
 }
 
 export default Metronome;
+
+Metronome.BPMInput = BPMInput;
+Metronome.PlayButton = PlayButton;
