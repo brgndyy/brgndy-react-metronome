@@ -13,18 +13,14 @@ npm install brgndy-react-metronome
 Import components
 
 ```javascript
-import {
-  MetronomeButton,
-  Metronome,
-  MetronomeProvider,
-} from "brgndy-react-metronome";
+import { Metronome } from 'brgndy-react-metronome';
 
 export default function Component() {
   return (
-    <MetronomeProvider>
-      <Metronome />
-      <MetronomeButton />
-    </MetronomeProvider>
+    <Metronome>
+      <Metronome.BPMInput />
+      <Metronome.PlayButton />
+    </Metronome>
   );
 }
 ```
