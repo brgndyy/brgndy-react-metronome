@@ -1,4 +1,4 @@
-import useMetronomeContext from '../../hooks/useMetronomeContext';
+import useMetronomeContext from '@/lib/hooks/useMetronomeContext';
 
 interface MetronomeProps {
   type?: 'number' | 'range';
