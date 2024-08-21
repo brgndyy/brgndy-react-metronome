@@ -37,7 +37,7 @@ function Metronome({
       autoPlay,
       onEndCount,
     }),
-    [metronome, minBpm, maxBpm],
+    [metronome, minBpm, maxBpm, autoPlay, onEndCount],
   );
 
   return <MetronomeContext.Provider value={contextValue}>{children}</MetronomeContext.Provider>;

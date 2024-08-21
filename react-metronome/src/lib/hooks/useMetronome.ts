@@ -60,7 +60,7 @@ const useMetronome = ({
         return prevCount + 1;
       }
     });
-  }, [count, onEndCount]);
+  }, [count, onEndCount, maxBeatCount]);
 
   useEffect(() => {
     if (!isPlaying) return;
