@@ -1,11 +1,11 @@
 import useMetronomeContext from '@/lib/hooks/useMetronomeContext';
 
-interface ButtonProps {
+interface PlayButtonProps {
   className?: string;
   buttonContents?: [string, string] | [React.ReactNode, React.ReactNode];
 }
 
-function PlayButton({ className = '', buttonContents = ['Play', 'Pause'] }: ButtonProps) {
+function PlayButton({ className = '', buttonContents = ['Play', 'Pause'] }: PlayButtonProps) {
   const { isPlaying, handleTogglePlaying } = useMetronomeContext();
 
   return (
