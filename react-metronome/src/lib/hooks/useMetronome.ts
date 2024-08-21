@@ -1,45 +1,73 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import tickSound from '../../lib/assets/tick.wav';
-import tockSound from '../../lib/assets/tock.wav';
+import tickSound from '../assets/tick.wav';
+import tockSound from '../assets/tock.wav';
 
-const CONDITION = {
-  min_metronome_count: 1,
-  max_metronome_count: 4,
+const METRONOME_COUNT = {
+  MIN: 1,
+  MAX: 4,
 } as const;
 
-type UseMetronomeHookProps = {
-  minBpm: number;
-  maxBpm: number;
+type MetronomeOptions = {
+  minBpm?: number;
+  maxBpm?: number;
+  autoPlay?: boolean;
+  onEndCount?: () => void;
+  maxBeatCount?: number;
 };
 
-const useMetronome = ({ minBpm, maxBpm }: UseMetronomeHookProps) => {
+const useMetronome = ({
+  minBpm = 1,
+  maxBpm = 300,
+  autoPlay = false,
+  onEndCount = () => {},
+  maxBeatCount = 4,
+}: MetronomeOptions) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const bpmRef = useRef<HTMLInputElement | null>(null);
-  const [tick] = useState<HTMLAudioElement>(new Audio(tickSound));
-  const [tock] = useState<HTMLAudioElement>(new Audio(tockSound));
   const [bpm, setBpm] = useState<number>(60);
-  const [count, setCount] = useState<number>(CONDITION.min_metronome_count);
-
-  const handlePlayMetronomeSound = useCallback(async () => {
-    if (count === CONDITION.min_metronome_count && tick) {
-      tick.currentTime = 0;
-      await tick.play();
-    } else if (count > CONDITION.min_metronome_count && tock) {
-      tock.currentTime = 0;
-      await tock.play();
-    }
-
-    setCount((prevCount) =>
-      prevCount >= CONDITION.max_metronome_count ? CONDITION.min_metronome_count : prevCount + 1,
-    );
-  }, [count, tick, tock]);
+  const [count, setCount] = useState<number>(METRONOME_COUNT.MIN);
 
   useEffect(() => {
+    if (autoPlay) {
+      setIsPlaying(true);
+    }
+  }, [autoPlay]);
+
+  const handlePlayMetronomeSound = useCallback(() => {
+    const playSound = async (audioUrl: string) => {
+      const audio = new Audio(audioUrl);
+      try {
+        await audio.play();
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    if (count === METRONOME_COUNT.MIN) {
+      playSound(tickSound);
+    } else {
+      playSound(tockSound);
+    }
+
+    setCount((prevCount) => {
+      if (prevCount >= maxBeatCount) {
+        requestAnimationFrame(() => {
+          onEndCount();
+        });
+
+        return METRONOME_COUNT.MIN;
+      } else {
+        return prevCount + 1;
+      }
+    });
+  }, [count, onEndCount, maxBeatCount]);
+
+  useEffect(() => {
+    if (!isPlaying) return;
+
     const interval = setInterval(
       () => {
-        if (isPlaying) {
-          handlePlayMetronomeSound();
-        }
+        handlePlayMetronomeSound();
       },
       (60 / bpm) * 1000,
     );

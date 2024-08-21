@@ -4,7 +4,7 @@ export default function App() {
   return (
     <Metronome>
       <Metronome.BPMInput />
-      <Metronome.PlayButton />
+      <Metronome.Button />
     </Metronome>
   );
 }

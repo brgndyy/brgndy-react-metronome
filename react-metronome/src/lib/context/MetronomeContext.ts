@@ -1,6 +1,6 @@
 import { ChangeEventHandler, createContext, KeyboardEventHandler, MutableRefObject } from 'react';
 
-export interface ContextPropsType {
+export interface ContextProps {
   isPlaying: boolean;
   bpm: number;
   minBpm: number;
@@ -13,7 +13,7 @@ export interface ContextPropsType {
   handleBPMInputFocus: () => void;
 }
 
-const MetronomeContext = createContext<ContextPropsType>({
+const MetronomeContext = createContext<ContextProps>({
   isPlaying: false,
   bpm: 1,
   minBpm: 1,
