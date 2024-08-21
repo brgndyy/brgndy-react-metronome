@@ -4,17 +4,19 @@ import useMetronome from '../hooks/useMetronome';
 import tickSound from '../assets/tick.wav';
 import tockSound from '../assets/tock.wav';
 
-global.Audio = vi.fn().mockImplementation(() => {
+global.Audio = vi.fn().mockImplementation((audioUrl) => {
   return {
-    play: vi.fn(),
+    play: vi.fn().mockResolvedValue(undefined),
+    src: audioUrl,
     currentTime: 0,
   };
-});
+}) as unknown as jest.Mock;
 
 describe('useMetronome Hook에 대한 테스트 코드 작성', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.clearAllMocks();
+    global.requestAnimationFrame = vi.fn().mockImplementation((cb) => cb());
   });
 
   afterEach(() => {
@@ -61,18 +63,18 @@ describe('useMetronome Hook에 대한 테스트 코드 작성', () => {
     expect(result.current.bpm).toBe(1);
   });
 
-  it('버튼을 누르면 재생과 일시정지 버튼이 번갈아서 렌더링 된다.', () => {
+  it('버튼을 누르면 재생과 일시정지 버튼이 번갈아서 렌더링 된다.', async () => {
     const { result } = renderHook(() => useMetronome({ minBpm: 1, maxBpm: 300 }));
 
     expect(result.current.isPlaying).toBe(false);
 
-    act(() => {
+    await act(async () => {
       result.current.handleTogglePlaying();
     });
 
     expect(result.current.isPlaying).toBe(true);
 
-    act(() => {
+    await act(async () => {
       result.current.handleTogglePlaying();
     });
 
@@ -86,7 +88,7 @@ describe('useMetronome Hook에 대한 테스트 코드 작성', () => {
       result.current.handleTogglePlaying();
     });
 
-    act(() => {
+    await act(async () => {
       vi.advanceTimersByTime((60 / result.current.bpm) * 1000);
     });
 
@@ -100,10 +102,35 @@ describe('useMetronome Hook에 대한 테스트 코드 작성', () => {
       result.current.handleTogglePlaying();
     });
 
-    act(() => {
+    await act(async () => {
+      vi.advanceTimersByTime((60 / result.current.bpm) * 1000);
+    });
+
+    await act(async () => {
       vi.advanceTimersByTime((60 / result.current.bpm) * 1000);
     });
 
     expect(global.Audio).toHaveBeenCalledWith(tockSound);
+  });
+
+  it('maxBeatCount이 true로 되면 onEndCount 함수가 실행 된다.', async () => {
+    const onEndCountMock = vi.fn();
+    const { result } = renderHook(() =>
+      useMetronome({ maxBeatCount: 2, onEndCount: onEndCountMock }),
+    );
+
+    act(() => {
+      result.current.handleTogglePlaying();
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime((60 / result.current.bpm) * 1000);
+    });
+
+    await act(async () => {
+      vi.advanceTimersByTime((60 / result.current.bpm) * 1000); // 두 번째 박자
+    });
+
+    expect(onEndCountMock).toHaveBeenCalledTimes(1);
   });
 });
