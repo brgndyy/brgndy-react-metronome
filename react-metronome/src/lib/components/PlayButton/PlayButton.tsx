@@ -8,6 +8,8 @@ interface PlayButtonProps {
 function PlayButton({ className = '', buttonContents = ['Play', 'Pause'] }: PlayButtonProps) {
   const { isPlaying, handleTogglePlaying } = useMetronomeContext();
 
+  console.log('test');
+
   return (
     <button className={className} onClick={handleTogglePlaying}>
       {isPlaying ? buttonContents[1] : buttonContents[0]}
