@@ -29,7 +29,13 @@ jobs:
         run: npx changeset version
         working-directory: react-metronome
 
+      - name: Check for changes
+        id: changes
+        run: |
+          git diff --quiet || echo "changes detected"
+
       - name: Push changes and tags
+        if: steps.changes.outputs.changes_detected
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -41,6 +47,7 @@ jobs:
         working-directory: react-metronome
 
       - name: Publish to npm
+        if: steps.changes.outputs.changes_detected
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx changeset publish
