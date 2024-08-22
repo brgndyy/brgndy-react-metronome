@@ -30,12 +30,14 @@ jobs:
         working-directory: react-metronome
 
       - name: Push changes and tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add .
           git commit -m "Version Packages"
-          git push origin HEAD:main --follow-tags
+          git push --follow-tags
         working-directory: react-metronome
 
       - name: Publish to npm
