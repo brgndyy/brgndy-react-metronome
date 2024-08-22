@@ -28,29 +28,20 @@ jobs:
         working-directory: react-metronome
 
       - name: Create release version
-        run: npx changeset version
-        working-directory: react-metronome
-
-      - name: Check for changes before commit
-        id: check_changes
         run: |
-          git diff --quiet || echo "changes_detected=true" >> $GITHUB_ENV
+          npx changeset version
+          git add .
+          git commit -m "Version Packages" || echo "No changes to commit"
         working-directory: react-metronome
 
       - name: Push changes and tags
-        if: env.changes_detected == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add .
-          git commit -m "Version Packages"
           git push origin HEAD:main --follow-tags
         working-directory: react-metronome
 
       - name: Publish to npm
-        if: env.changes_detected == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx changeset publish
