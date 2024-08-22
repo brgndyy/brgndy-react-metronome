@@ -27,24 +27,14 @@ jobs:
         run: npm ci
         working-directory: react-metronome
 
-      - name: Check for code changes
-        id: changes
-        run: |
-          if [ "$(git diff --name-only HEAD^ HEAD)" ]; then
-            echo "changes_detected=true" >> $GITHUB_ENV
-          else
-            echo "changes_detected=false" >> $GITHUB_ENV
-          fi
-        working-directory: react-metronome
-
-      - name: Create changeset
-        if: env.changes_detected == 'true'
-        run: npx changeset add
-        working-directory: react-metronome
-
       - name: Create release version
-        if: env.changes_detected == 'true'
         run: npx changeset version
+        working-directory: react-metronome
+
+      - name: Check for changes before commit
+        id: check_changes
+        run: |
+          git diff --quiet || echo "changes_detected=true" >> $GITHUB_ENV
         working-directory: react-metronome
 
       - name: Push changes and tags
