@@ -37,7 +37,7 @@ jobs:
           git config user.email "actions@github.com"
           git add .
           git commit -m "Version Packages"
-          git push --follow-tags
+          git push origin HEAD:main --follow-tags
         working-directory: react-metronome
 
       - name: Publish to npm
