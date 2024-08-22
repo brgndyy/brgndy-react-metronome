@@ -1,7 +1,7 @@
 name: Package Release
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -18,21 +18,30 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Change directory to react-metronome
+        run: cd react-metronome
+
       - name: Install dependencies
         run: npm ci
+        working-directory: react-metronome
 
       - name: Create release version
         run: npx changeset version
+        working-directory: react-metronome
 
       - name: Push changes and tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add .
           git commit -m "Version Packages"
-          git push --follow-tags
+          git push origin HEAD:main --follow-tags
+        working-directory: react-metronome
 
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx changeset publish
+        working-directory: react-metronome
