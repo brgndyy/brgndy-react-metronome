@@ -25,17 +25,23 @@ jobs:
         run: npm ci
         working-directory: react-metronome
 
+      - name: Check for changesets
+        id: changesets
+        run: |
+          if [ -z "$(git diff HEAD -- .changeset)" ]; then
+            echo "changesets=false" >> $GITHUB_ENV
+          else
+            echo "changesets=true" >> $GITHUB_ENV
+          fi
+        working-directory: react-metronome
+
       - name: Create release version
+        if: env.changesets == 'true'
         run: npx changeset version
         working-directory: react-metronome
 
-      - name: Check for changes
-        id: changes
-        run: |
-          git diff --quiet || echo "changes detected"
-
       - name: Push changes and tags
-        if: steps.changes.outputs.changes_detected
+        if: env.changesets == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -47,7 +53,7 @@ jobs:
         working-directory: react-metronome
 
       - name: Publish to npm
-        if: steps.changes.outputs.changes_detected
+        if: env.changesets == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx changeset publish
