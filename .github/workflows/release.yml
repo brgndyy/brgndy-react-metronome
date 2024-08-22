@@ -9,6 +9,10 @@ jobs:
   release:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: react-metronome
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,26 +24,20 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Change directory to react-metronome
-        run: cd react-metronome
-
       - name: Install dependencies
         run: npm ci
-        working-directory: react-metronome
 
       - name: Create release version
         run: |
           npx changeset version
           git add .
           git commit -m "Version Packages" || echo "No changes to commit"
-        working-directory: react-metronome
 
       - name: Push changes and tags
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git push origin HEAD:main --follow-tags
-        working-directory: react-metronome
 
       - name: Create .npmrc file
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
@@ -48,4 +46,3 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx changeset publish
-        working-directory: react-metronome
